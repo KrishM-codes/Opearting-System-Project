@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Producer-Consumer Simulation</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #007bff;
+    }
+
+    form {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    button[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    #container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    #prod, #cons, #buffer {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+    }
+
+    .list-group-item {
+        background-color: #f8f9fa;
+        border: none;
+    }
+
+    button[type="button"] {
+        margin-top: 20px;
+    }
+
+    button[type="button"] a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    #produce,
+    #consume {
+        background-color: #28a745; /* Green */
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    #produce:hover,
+    #consume:hover {
+        background-color: #218838; /* Darker green */
+    }
+</style>
+</head>
+<body>
+    <h1>Producer-Consumer Simulation</h1>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <label for="buffer_size">Enter Buffer Size:</label>
+        <input type="number" id="buffer_size" name="buffer_size" value="{{buffer}}" required>
+        <button type="submit">Run</button>
+    </form>
+
+    {% if buffer > 0 %}
+        <div id="container" style="display: flex; padding: 10px;">
+            <div id="prod" style="padding: 20px;">
+                <h3>Producer</h3>
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input id="produce" type="submit" name="produce" value="Produce">
+                </form>
+
+                {% if producing %}
+                    <p id="production"></p>
+                    <script>
+                        var producing = true;
+                    </script>
+                {% else %}
+                    <script>
+                        var producing = false;
+                    </script>
+                {% endif %}
+
+                <div id="prod_msg"></div>
+                {% if prod_msg %}
+                    <script>
+                        document.getElementById("prod_msg").innerHTML="{{prod_msg}}"
+                    </script>
+                {% endif %}
+            </div>
+
+            <div id="buffer" style="padding: 20px;">
+                <h3>Buffer</h3>
+
+                <ul class="list-group list-group-vertical">
+                    {% for i in buff_list %}
+                        <li class="list-group-item">{{i}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div id="cons" style="padding: 20px;">
+                <h3>Consumer</h3>
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    <input id="consume" type="submit" name="consume" value="Consume" >
+                </form>
+                {% if consuming %}
+                    <p id="consumption"></p>
+                    <script>
+                        var consuming = true;
+                    </script>
+                {% else %}
+                    <script>
+                        var consuming = false;
+                    </script>
+                {% endif %}
+
+                <div id="cons_msg"></div>
+                {% if cons_msg %}
+                    <script>
+                        document.getElementById('cons_msg').innerHTML = "{{cons_msg}}"
+                    </script>
+                {% endif %}
+            </div>
+
+        </div>
+    {% endif %}
+
+    <button type="button" class="btn btn-primary"><a href="{% url 'home' %}" class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Back</a></button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (producing) {
+                Producing();
+            }
+            if (consuming) {
+                Consuming();
+            }
+        });
+        function timerP() {
+            document.getElementById("production").innerHTML = ""
+            document.getElementById('consume').disabled = false
+            document.getElementById('produce').disabled = false
+            document.getElementById('prod_msg').innerHTML = "{{prod_msg}}"
+            document.getElementById('cons_msg').innerHTML = ""
+        }
+        function Producing() {
+            document.getElementById('production').innerHTML='Producing ... '
+            document.getElementById('consume').disabled = true
+            document.getElementById('produce').disabled = true
+            document.getElementById('prod_msg').innerHTML = ""
+            document.getElementById('cons_msg').innerHTML = "Can't access Buffer!! It is aquired by monitor."
+            setTimeout(timerP, 3000);
+        }
+
+        function timerC() {
+            document.getElementById("consumption").innerHTML = ""
+            document.getElementById('consume').disabled = false
+            document.getElementById('produce').disabled = false
+            document.getElementById('cons_msg').innerHTML = "{{cons_msg}}"
+            document.getElementById('prod_msg').innerHTML = ""
+        }
+        function Consuming() {
+            document.getElementById('consumption').innerHTML='Consuming ... '
+            document.getElementById('consume').disabled = true
+            document.getElementById('produce').disabled = true
+            document.getElementById('cons_msg').innerHTML = ""
+            document.getElementById('prod_msg').innerHTML = "Can't access Buffer!! It is aquired by monitor."
+            setTimeout(timerC, 3000);
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
